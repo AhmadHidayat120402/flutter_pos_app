@@ -6,6 +6,7 @@ import '../../../core/assets/assets.gen.dart';
 import '../../../core/components/buttons.dart';
 import '../../../core/components/custom_text_field.dart';
 import '../../../core/components/spaces.dart';
+import '../../../data/datasources/auth_local_datasources.dart';
 import '../../home/pages/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -79,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
               state.maybeWhen(
                 orElse: () {},
                 success: (authResponseModel) {
+                  AuthLocalDatasource().saveAuthData(authResponseModel);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pos_app/data/datasources/auth_local_datasources.dart';
 import 'package:pos_app/data/datasources/auth_remote_datasources.dart';
+import 'package:pos_app/data/datasources/product_remote_datasources.dart';
 import 'package:pos_app/presentation/auth/bloc/login/login_bloc.dart';
 import 'package:pos_app/presentation/auth/pages/login_page.dart';
+import 'package:pos_app/presentation/home/bloc/logout/logout_bloc.dart';
+import 'package:pos_app/presentation/home/bloc/product/product_bloc.dart';
+import 'package:pos_app/presentation/home/pages/dashboard_page.dart';
 
 import 'core/constants/colors.dart';
 
@@ -16,8 +21,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginBloc(AuthRemoteDatasource()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => LoginBloc(AuthRemoteDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => LogoutBloc(AuthRemoteDatasource()),
+        ),
+        BlocProvider(
+          create: (context) => ProductBloc(ProductRemoteDatasource())
+            ..add(const ProductEvent.fetchLokal()),
+        ),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -39,7 +55,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const LoginPage(),
+        home: FutureBuilder(
+          future: AuthLocalDatasource().isAuth(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data == true) {
+              return const DashboardPage();
+            } else {
+              return const LoginPage();
+            }
+          },
+        ),
       ),
     );
   }
