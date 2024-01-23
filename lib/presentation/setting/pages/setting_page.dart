@@ -83,7 +83,13 @@ class _SettingPageState extends State<SettingPage> {
             BlocConsumer<LogoutBloc, LogoutState>(
               listener: (context, state) {
                 state.maybeMap(
-                  orElse: () {},
+                  orElse: () {
+                    AuthLocalDatasource().removeAuthData();
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()));
+                  },
                   success: (_) {
                     AuthLocalDatasource().removeAuthData();
                     Navigator.pushReplacement(
@@ -94,11 +100,30 @@ class _SettingPageState extends State<SettingPage> {
                 );
               },
               builder: (context, state) {
-                return ElevatedButton(
-                  onPressed: () {
-                    context.read<LogoutBloc>().add(const LogoutEvent.logout());
+                return state.maybeWhen(
+                  orElse: () {
+                    return ElevatedButton(
+                      onPressed: () {
+                        context
+                            .read<LogoutBloc>()
+                            .add(const LogoutEvent.logout());
+                      },
+                      child: const Text('Logout'),
+                    );
                   },
-                  child: const Text('Logout'),
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  success: () {
+                    return ElevatedButton(
+                      onPressed: () {
+                        context
+                            .read<LogoutBloc>()
+                            .add(const LogoutEvent.logout());
+                      },
+                      child: const Text('Logout'),
+                    );
+                  },
                 );
               },
             ),
